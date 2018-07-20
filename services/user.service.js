@@ -1,7 +1,7 @@
 'use strict'
 
 const sha256 = require('sha256')
-const User = require('../models/user.model')
+const db = require('../db')()
 
 exports.createUser = (req, res, next) => {
     const u = {
@@ -10,132 +10,129 @@ exports.createUser = (req, res, next) => {
         email: req.body.email,
         password: sha256(req.body.password)
     }
-    User.findOne({
-        login: u.login
-    }, (e, user) => {
-        if (e) {
-            next({
-                code: 500,
-                data: e
-            })
-        } else {
-            if (user) {
-                next({
-                    code: 409,
-                    data: new Error("login has been already taken.")
-                })
-            } else {
-                User.create(u, (e, user) => {
-                    if (e) {
-                        next({
-                            code: 500,
-                            data: e
-                        })
-                    } else {
-                        res.status(201)
-                        res.json({
-                            message: "user has been created."
-                        })
-                    }
-                })
-            }
+
+    const user = db.get('users')
+        .defaults({
+            users: []
+        })
+        .find({
+            login: u.login
+        })
+        .value()
+
+    if (user) {
+        next({
+            code: 409,
+            data: new Error("login has been already taken.")
+        })
+    } else {
+        const lastUser = db.get('users')
+            .last()
+            .value()
+        let nextId = 1;
+
+        if (lastUser) {
+            nextId = parseInt(lastUser._id, 10) + 1
         }
-    })
+
+        u._id = "" + nextId;
+
+        db.get('users')
+            .defaults({
+                users: []
+            })
+            .push(u)
+            .write()
+
+        res.status(201)
+        res.json({
+            message: "user has been created."
+        })
+    }
 }
 
 exports.getMe = (req, res, next) => {
-    User.findOne({
-        _id: req.user.data.id
-    }, (e, user) => {
-        console.log(user)
-        if (e) {
-            next({
-                code: 500,
-                data: e
-            })
-        } else {
-            if (user) {
-                res.json({
-                    display: user.display
-                })
-            } else {
-                next({
-                    code: 404,
-                    data: new Error('user is not found.')
-                })
-            }
-        }
-    })
+    const user = db.get('users')
+        .defaults({
+            users: []
+        })
+        .find({
+            _id: req.user.data.id
+        })
+        .value()
+
+    if (user) {
+        res.json({
+            display: user.display
+        })
+    } else {
+        next({
+            code: 404,
+            data: new Error('user is not found.')
+        })
+    }
 }
 
 exports.updateMe = (req, res, next) => {
-    User.findOne({
-        _id: req.user.data.id
-    }, (e, user) => {
-        if (e) {
-            next({
-                code: 500,
-                data: e
-            })
-        } else {
-            if (user) {
-                User.findOneAndUpdate({
-                        _id: req.user.data.id
-                    },
-                    req.body, (e) => {
-                        if (e) {
-                            next({
-                                code: 500,
-                                data: e
-                            })
-                        } else {
-                            res.json({
-                                message: "user profile has been updated."
-                            })
-                        }
-                    })
-            } else {
-                next({
-                    code: 404,
-                    data: new Error('user is not found.')
-                })
-            }
-        }
+    const user = db.get('users')
+        .defaults({
+            users: []
+        })
+        .find({
+            _id: req.user.data.id
+        })
+        .value()
+
+    if (req.body.email) {
+        user.email = req.body.email;
+    }
+    if (req.body.display) {
+        user.display = req.body.display;
+    }
+
+    db.get('users')
+        .defaults({
+            users: []
+        })
+        .find({
+            _id: req.user.data.id
+        })
+        .assign(user)
+        .write()
+    res.json({
+        message: "user profile has been updated."
     })
 }
 
 exports.updateUser = (req, res, next) => {
-    User.findOne({
-        _id: req.params.id
-    }, (e, user) => {
-        if (e) {
-            next({
-                code: 500,
-                data: e
-            })
-        } else {
-            if (user) {
-                User.findOneAndUpdate({
-                        _id: req.params.id
-                    },
-                    req.body, (e) => {
-                        if (e) {
-                            next({
-                                code: 500,
-                                data: e
-                            })
-                        } else {
-                            res.json({
-                                message: "user profile has been updated."
-                            })
-                        }
-                    })
-            } else {
-                next({
-                    code: 404,
-                    data: new Error('user is not found.')
-                })
-            }
-        }
+    const user = db.get('users')
+        .defaults({
+            users: []
+        })
+        .find({
+            _id: req.params.id
+        })
+        .value()
+
+    console.log(req.params.id, user)
+
+    if (req.body.email) {
+        user.email = req.body.email;
+    }
+    if (req.body.display) {
+        user.display = req.body.display;
+    }
+
+    db.get('users')
+        .defaults({
+            users: []
+        })
+        .find({
+            _id: req.params.id
+        })
+        .assign(user)
+        .write()
+    res.json({
+        message: "user profile has been updated."
     })
 }

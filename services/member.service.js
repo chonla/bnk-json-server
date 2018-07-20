@@ -1,133 +1,123 @@
-const Member = require('../models/member.model');
+const db = require('../db')()
 
-
-exports.getMembers = async (req, res, next) => {
-    try {
-        let members = await Member.find().sort({
-            "_id": 1
-        });
-        if (members.length == 0) {
-            next({
-                code: 404,
-                data: new Error('member is not found.')
-            })
-        } else {
-            res.json(members)
-        }
-    } catch (err) {
-        next({
-            code: 500,
-            data: err
+exports.getMembers = (req, res, next) => {
+    const members = db
+        .defaults({
+            members: []
         })
-        return
+        .get('members')
+        .value()
+
+    if (members) {
+        res.json(members)
+    } else {
+        next({
+            code: 404,
+            data: new Error('member is not found.')
+        })
     }
-    return
 };
 
-exports.getMember = async (req, res, next) => {
-    try {
-        let member = await Member.findOne({
+exports.getMember = (req, res, next) => {
+    const member = db
+        .defaults({
+            members: []
+        })
+        .get('members')
+        .find({
             _id: req.params.id
-        });
-        if (member === null) {
-            next({
-                code: 404,
-                data: new Error('member is not found.')
-            })
-        } else {
-            res.json(member)
-        }
-    } catch (err) {
-        if (err.name === "CastError") {
-            next({
-                code: 404,
-                data: new Error('member is not found.')
-            })
-        } else {
-            next({
-                code: 500,
-                data: err
-            })
-        }
-        return
+        })
+        .value()
+
+    if (member) {
+        res.json(member)
+    } else {
+        next({
+            code: 404,
+            data: new Error('member is not found.')
+        })
     }
-    return
 };
 
-exports.createMember = async (req, res, next) => {
-    const model = {
+exports.createMember = (req, res, next) => {
+    const member = {
         name: req.body.name,
         imgUrl: req.body.imgUrl,
         instagramId: req.body.instagramId,
     }
-    try {
-        let result = await Member.findOne(model);
-        if (result) {
-            next({
-                code: 409,
-                data: new Error("member has been already added.")
-            })
-        } else {
-            await Member.create(model);
-            res.status(201)
-            res.json({
-                message: "member has been created."
-            })
-        }
-    } catch (err) {
-        next({
-            code: 500,
-            data: err
+
+    const lastMember = db
+        .defaults({
+            members: []
         })
-        return
+        .get('members')
+        .last()
+        .value()
+    let nextId = 1;
+
+    if (lastMember) {
+        nextId = parseInt(lastMember._id, 10) + 1
     }
+
+    member._id = "" + nextId;
+
+    db.defaults({
+            members: []
+        })
+        .get('members')
+        .push(member)
+        .write()
+
+    res.status(201)
+    res.json({
+        message: "user has been created."
+    })
 };
-exports.updateMember = async (req, res, next) => {
-    const model = {
-        name: req.body.name,
-        imgUrl: req.body.imgUrl,
-        instagramId: req.body.instagramId,
-    }
-    try {
-        let member = await Member.findOne({
+
+exports.updateMember = (req, res, next) => {
+    const user = db.get('members')
+        .defaults({
+            members: []
+        })
+        .find({
             _id: req.params.id
         })
-        if (member) {
-            await Member.findOneAndUpdate({
-                _id: req.params.id
-            }, model)
+        .value()
 
-            res.json({
-                message: "member has been updated."
-            })
-        } else {
-            next({
-                code: 404,
-                data: new Error('member is not found.')
-            })
-        }
-    } catch (err) {
-        next({
-            code: 500,
-            data: err
-        })
+    if (req.body.name) {
+        member.name = req.body.name;
     }
-    return
-};
-exports.deleteMember = async (req, res, next) => {
-    try {
-        await Member.deleteOne({
+    if (req.body.imgUrl) {
+        member.imgUrl = req.body.imgUrl;
+    }
+    if (req.body.instagramId) {
+        member.instagramId = req.body.instagramId;
+    }
+
+    db.get('members')
+        .defaults({
+            members: []
+        })
+        .find({
             _id: req.params.id
         })
-        res.json({
-            message: "member has been delete"
-        })
+        .assign(member)
+        .write()
+    res.json({
+        message: "member profile has been updated."
+    })
+};
 
-    } catch (err) {
-        next({
-            code: 500,
-            data: err
+exports.deleteMember = (req, res, next) => {
+    db.defaults({
+            members: []
         })
-    }
-    return
+        .get('members')
+        .remove({
+            _id: req.params.id
+        })
+        .write()
+    res.json({
+        message: "member profile has been updated."
+    })
 };

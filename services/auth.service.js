@@ -2,7 +2,8 @@
 
 const jwt = require('jsonwebtoken')
 const sha256 = require('sha256')
-const User = require('../models/user.model')
+//  const User = require('../models/user.model')
+const db = require('../db')()
 
 const createToken = (login, id) => {
     console.log(login, id)
@@ -19,26 +20,24 @@ const createToken = (login, id) => {
 }
 
 exports.login = (req, res, next) => {
-    User.findOne({
-        login: req.body.login
-    }, (e, user) => {
-        if (e) {
-            next({
-                code: 500,
-                data: e
-            })
-        } else {
-            if (user && (sha256(req.body.password) === user.password)) {
-                const token = createToken(req.body.login, user._id)
-                res.json({
-                    token: token
-                })
-            } else {
-                next({
-                    code: 401,
-                    data: new Error("authorization failed")
-                })
-            }
-        }
-    })
+    const user = db.get('users')
+        .defaults({
+            users: []
+        })
+        .find({
+            login: req.body.login
+        })
+        .value()
+
+    if (user && (sha256(req.body.password) === user.password)) {
+        const token = createToken(req.body.login, user._id)
+        res.json({
+            token: token
+        })
+    } else {
+        next({
+            code: 401,
+            data: new Error("authorization failed")
+        })
+    }
 }
