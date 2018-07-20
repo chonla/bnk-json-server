@@ -1,30 +1,10 @@
 # RESTful API with Node Express
 
-Almost ready to use API Service.
+Almost ready to use API Service. This is a Undockerized version of https://github.com/chonla/node-express-member.
 
-## Content
+## Preloaded Data
 
-* RESTful API Service with Node Express, CORS and PREFLIGHT enabled, JWT provided running on port `3000`.
-* MongoDB with initial seed.
-
-## Setup
-
-### With Docker
-
-Use docker compose: `docker-compose up --build -d`
-
-### With Manual
-
-* Seed data is located in [./docker/mongo-seed](./docker/mongo-seed). You can use `mongoimport` to migrate them into your database named `data`.
-
-	```bash
-	mongoimport --host mongodb --db data --type json --file /members.json --maintainInsertionOrder --jsonArray
-	mongoimport --host mongodb --db data --type json --file /users.json --maintainInsertionOrder --jsonArray
-	```
-
-## Seed Data
-
-See [seed data](./docker/mongo-seed) for detail.
+**Every time server is started, database will be restored.**
 
 ### Users
 
