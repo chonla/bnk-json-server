@@ -84,13 +84,13 @@ exports.updateMember = (req, res, next) => {
         })
         .value()
 
-    if (req.body.name) {
+    if (!!req.body.name) {
         member.name = req.body.name;
     }
-    if (req.body.imgUrl) {
+    if (!!req.body.imgUrl) {
         member.imgUrl = req.body.imgUrl;
     }
-    if (req.body.instagramId) {
+    if (!!req.body.instagramId) {
         member.instagramId = req.body.instagramId;
     }
 

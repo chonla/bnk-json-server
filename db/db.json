@@ -29,8 +29,8 @@
     },
     {
       "_id": "3",
-      "name": "Music",
-      "imgUrl": "https://i.pinimg.com/736x/3a/3d/56/3a3d569c3186f168e30256b46095e8de.jpg",
+      "name": "a name",
+      "imgUrl": "https://localhost:4000",
       "instagramId": "music.bnk48official"
     },
     {
