@@ -75,7 +75,7 @@ exports.createMember = (req, res, next) => {
 };
 
 exports.updateMember = (req, res, next) => {
-    const user = db.get('members')
+    const member = db.get('members')
         .defaults({
             members: []
         })
