@@ -2,6 +2,12 @@
 
 Almost ready to use API Service. This is a Undockerized version of https://github.com/chonla/node-express-member.
 
+## Run
+
+```
+node server.js
+```
+
 ## Preloaded Data
 
 **Every time server is started, database will be restored.**
