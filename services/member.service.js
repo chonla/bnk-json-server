@@ -108,6 +108,34 @@ exports.updateMember = (req, res, next) => {
     })
 };
 
+exports.replaceMember = (req, res, next) => {
+    const member = db.get('members')
+        .defaults({
+            members: []
+        })
+        .find({
+            _id: req.params.id
+        })
+        .value()
+
+    member.name = req.body.name;
+    member.imgUrl = req.body.imgUrl;
+    member.instagramId = req.body.instagramId;
+
+    db.get('members')
+        .defaults({
+            members: []
+        })
+        .find({
+            _id: req.params.id
+        })
+        .assign(member)
+        .write()
+    res.json({
+        message: "member profile has been updated."
+    })
+};
+
 exports.deleteMember = (req, res, next) => {
     db.defaults({
             members: []

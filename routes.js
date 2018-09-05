@@ -20,6 +20,7 @@ module.exports = (app) => {
     router.get('/bnk/members', cors(), MemberService.getMembers)
     router.get('/bnk/members/:id', cors(), MemberService.getMember)
     router.post('/bnk/members', [cors(), security.secure], MemberService.createMember)
+    router.put('/bnk/members/:id', [cors(), security.secure], MemberService.replaceMember)
     router.patch('/bnk/members/:id', [cors(), security.secure], MemberService.updateMember)
     router.delete('/bnk/members/:id', [cors(), security.secure], MemberService.deleteMember)
 
