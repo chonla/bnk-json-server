@@ -9,7 +9,9 @@ require('./routes')(app)
 const fs = require('fs-extra')
 const path = require('path')
 
-fs.copySync(path.resolve(__dirname, './db/db.original.json'), path.resolve(__dirname, './db/db.json'))
+fs.copySync(path.resolve(__dirname, './db/db.original.json'), path.resolve(__dirname, './db/db.json'), {
+    overwrite: true,
+})
 console.log('Database is restored.')
 
 app.listen(3000, () => {
